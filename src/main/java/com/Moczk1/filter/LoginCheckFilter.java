@@ -1,5 +1,6 @@
 package com.Moczk1.filter;
 
+import com.Moczk1.common.BaseContext;
 import com.Moczk1.common.R;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class LoginCheckFilter  implements Filter {
 
         String requestURI = request.getRequestURI();
         log.info("本次请求的是：{}", requestURI);
+
         // 不拦截的所有uri
         String[] uris = new String[] {
                 "/employee/login",
@@ -45,15 +47,14 @@ public class LoginCheckFilter  implements Filter {
         // 不是访问白名单uri， 检查是否登录成功；成功，则放行。
         if (request.getSession().getAttribute("employee") != null) {
             log.info("用户已经登陆，userid为：{}", request.getSession().getAttribute("employee"));
+            Long id = (Long) request.getSession().getAttribute("employee");
+            BaseContext.setId(id);
             filterChain.doFilter(request, response);
             return;
         }
         log.info("用户未登录");
         response.getWriter().write(JSON.toJSONString(R.error("NOTLOGIN")));
         return;
-
-//        log.info("拦截到请求：{}", request.getRequestURI());
-//        filterChain.doFilter(request, response);
     }
 
     public boolean check(String[] uris, String requestURI) {
